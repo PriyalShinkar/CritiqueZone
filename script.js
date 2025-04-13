@@ -2,354 +2,344 @@
 const reviews = [
     {
         id: 1,
-        title: "The Shawshank Redemption",
+        title: "Great Product!",
         rating: 5,
-        category: "Movies",
-        text: "A masterpiece of storytelling that keeps you engaged from start to finish. The performances are outstanding, and the direction is impeccable.",
+        category: "Electronics",
+        text: "This product exceeded my expectations. The quality is outstanding and the features are exactly what I needed.",
         author: "John Doe",
-        date: "March 15, 2024"
+        date: "2024-03-15"
     },
     {
         id: 2,
-        title: "Local Italian Restaurant",
-        rating: 4,
-        category: "Restaurants",
-        text: "Authentic Italian cuisine with a modern twist. The pasta dishes are exceptional, and the service is top-notch.",
+        title: "Disappointing Experience",
+        rating: 2,
+        category: "Books",
+        text: "The book was not as described. The content was shallow and lacked depth.",
         author: "Jane Smith",
-        date: "March 14, 2024"
+        date: "2024-03-14"
     },
     {
         id: 3,
-        title: "Wireless Headphones",
-        rating: 4.5,
-        category: "Products",
-        text: "Great sound quality and comfortable to wear for long periods. Battery life could be better, but overall a solid purchase.",
+        title: "Worth Every Penny",
+        rating: 5,
+        category: "Fashion",
+        text: "The material is high quality and the fit is perfect. I would definitely recommend this to others.",
         author: "Mike Johnson",
-        date: "March 13, 2024"
+        date: "2024-03-13"
     },
     {
         id: 4,
-        title: "The Great Gatsby",
-        rating: 5,
-        category: "Books",
-        text: "A timeless classic that captures the essence of the American Dream. Fitzgerald's prose is simply beautiful.",
+        title: "Average Product",
+        rating: 3,
+        category: "Home & Kitchen",
+        text: "It's okay for the price, but there are better options available in the market.",
         author: "Sarah Wilson",
-        date: "March 12, 2024"
+        date: "2024-03-12"
     },
     {
         id: 5,
-        title: "Sushi Master",
-        rating: 3,
-        category: "Restaurants",
-        text: "The sushi was fresh but the service was slow. The prices are a bit high for what you get.",
-        author: "David Chen",
-        date: "March 11, 2024"
+        title: "Excellent Service",
+        rating: 5,
+        category: "Services",
+        text: "The customer service was exceptional. They went above and beyond to help me.",
+        author: "David Brown",
+        date: "2024-03-11"
     }
 ];
 
 // DOM Elements
 const searchInput = document.getElementById('search-input');
 const categoryFilter = document.getElementById('category-filter');
-const sortBy = document.getElementById('sort-by');
-const ratingFilters = document.querySelectorAll('.rating-filter input[type="checkbox"]');
+const sortOptions = document.getElementById('sort-by');
+const ratingFilters = document.querySelectorAll('.rating-filter input');
 const reviewsContainer = document.getElementById('reviews-container');
 const navLinks = document.querySelectorAll('.nav-links a');
+const mobileLinks = document.querySelectorAll('.mobile-menu a');
 const reviewForm = document.getElementById('review-form');
 const submitReviewForm = document.getElementById('submit-review-form');
+const mobileMenu = document.getElementById('mobile-menu');
+const hamburgerButton = document.getElementById('hamburger-btn');
+const themeToggle = document.getElementById('theme-toggle');
+const mobileThemeToggle = document.getElementById('mobile-theme-toggle');
+const resetFiltersBtn = document.getElementById('reset-filters');
 
 // Filter state
-let currentFilters = {
+let filterState = {
     search: '',
     category: 'all',
     sort: 'newest',
-    ratings: [1, 2, 3, 4, 5]
+    ratings: []
 };
 
 // Theme handling
-const themeToggle = document.getElementById('theme-toggle');
-const html = document.documentElement;
-const themeIcon = themeToggle.querySelector('i');
-
 // Check for saved theme preference
 const savedTheme = localStorage.getItem('theme') || 'light';
-html.setAttribute('data-theme', savedTheme);
+document.documentElement.setAttribute('data-theme', savedTheme);
 updateThemeIcon(savedTheme);
 
-themeToggle.addEventListener('click', () => {
-    const currentTheme = html.getAttribute('data-theme');
+// Theme toggle event listeners
+themeToggle.addEventListener('click', toggleTheme);
+mobileThemeToggle.addEventListener('click', toggleTheme);
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
     const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    
-    html.setAttribute('data-theme', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
     updateThemeIcon(newTheme);
-});
+}
 
 function updateThemeIcon(theme) {
-    themeIcon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+    const icon = theme === 'light' ? 'fa-moon' : 'fa-sun';
+    themeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
+    mobileThemeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
 }
 
-// Star rating functionality
-const starInputs = document.querySelectorAll('.star-rating input');
-const starLabels = document.querySelectorAll('.star-rating label');
+// Hamburger menu functionality
+hamburgerButton.addEventListener('click', () => {
+    mobileMenu.classList.toggle('active');
+    const icon = mobileMenu.classList.contains('active') ? 'fa-times' : 'fa-bars';
+    hamburgerButton.innerHTML = `<i class="fas ${icon}"></i>`;
+});
 
-starInputs.forEach((input, index) => {
-    input.addEventListener('change', () => {
-        updateStarDisplay(index);
+// Close mobile menu when clicking outside
+document.addEventListener('click', (e) => {
+    if (!mobileMenu.contains(e.target) && !hamburgerButton.contains(e.target)) {
+        mobileMenu.classList.remove('active');
+        hamburgerButton.innerHTML = '<i class="fas fa-bars"></i>';
+    }
+});
+
+// Search functionality
+searchInput.addEventListener('input', (e) => {
+    filterState.search = e.target.value.toLowerCase();
+    filterAndRenderReviews();
+});
+
+// Category filter
+categoryFilter.addEventListener('change', (e) => {
+    filterState.category = e.target.value;
+    filterAndRenderReviews();
+});
+
+// Sort options
+sortOptions.addEventListener('change', (e) => {
+    filterState.sort = e.target.value;
+    filterAndRenderReviews();
+});
+
+// Rating filters
+ratingFilters.forEach(filter => {
+    filter.addEventListener('change', () => {
+        filterState.ratings = Array.from(ratingFilters)
+            .filter(f => f.checked)
+            .map(f => parseInt(f.value));
+        filterAndRenderReviews();
     });
 });
 
-function updateStarDisplay(selectedIndex) {
-    starLabels.forEach((label, index) => {
-        const icon = label.querySelector('i');
-        if (index <= selectedIndex) {
-            icon.className = 'fas fa-star';
-        } else {
-            icon.className = 'far fa-star';
-        }
-    });
-}
-
-// Initialize the page
-function initializePage() {
-    renderReviews();
-    setupEventListeners();
-    showReviews(); // Start with reviews page visible
-}
-
-// Set up event listeners
-function setupEventListeners() {
-    // Search functionality
-    searchInput.addEventListener('input', (e) => {
-        currentFilters.search = e.target.value.toLowerCase();
-        renderReviews();
-    });
-
-    // Category filter
-    categoryFilter.addEventListener('change', (e) => {
-        currentFilters.category = e.target.value;
-        renderReviews();
-    });
-
-    // Sort functionality
-    sortBy.addEventListener('change', (e) => {
-        currentFilters.sort = e.target.value;
-        renderReviews();
-    });
-
-    // Rating filters
-    ratingFilters.forEach(checkbox => {
-        checkbox.addEventListener('change', () => {
-            updateRatingFilters();
-            renderReviews();
-        });
-    });
-
-    // Navigation
-    navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const page = e.target.textContent.trim();
-            handleNavigation(page);
-        });
-    });
-
-    // Submit Review Form
-    reviewForm.addEventListener('submit', handleSubmitReview);
-}
-
-// Update rating filters based on checkbox states
-function updateRatingFilters() {
-    currentFilters.ratings = Array.from(ratingFilters)
-        .filter(checkbox => checkbox.checked)
-        .map(checkbox => parseInt(checkbox.value));
-}
-
-// Filter and sort reviews
-function getFilteredReviews() {
-    return reviews
-        .filter(review => {
-            const matchesSearch = review.title.toLowerCase().includes(currentFilters.search) ||
-                                review.text.toLowerCase().includes(currentFilters.search);
-            const matchesCategory = currentFilters.category === 'all' || 
-                                  review.category.toLowerCase() === currentFilters.category;
-            const matchesRating = currentFilters.ratings.includes(Math.floor(review.rating));
-            
-            return matchesSearch && matchesCategory && matchesRating;
-        })
-        .sort((a, b) => {
-            switch(currentFilters.sort) {
-                case 'highest':
-                    return b.rating - a.rating;
-                case 'lowest':
-                    return a.rating - b.rating;
-                case 'oldest':
-                    return new Date(a.date) - new Date(b.date);
-                case 'newest':
-                default:
-                    return new Date(b.date) - new Date(a.date);
-            }
-        });
-}
-
-// Render star rating
-function renderStars(rating) {
-    let stars = '';
-    for (let i = 1; i <= 5; i++) {
-        if (i <= rating) {
-            stars += '<i class="fas fa-star"></i>';
-        } else if (i - 0.5 <= rating) {
-            stars += '<i class="fas fa-star-half-alt"></i>';
-        } else {
-            stars += '<i class="far fa-star"></i>';
-        }
-    }
-    return stars;
-}
-
-// Render reviews
-function renderReviews() {
-    const filteredReviews = getFilteredReviews();
-    reviewsContainer.innerHTML = filteredReviews.map(review => `
-        <div class="review-card">
-            <div class="review-header">
-                <h3>${review.title}</h3>
-                <div class="rating">
-                    ${renderStars(review.rating)}
-                </div>
-            </div>
-            <div class="category">${review.category}</div>
-            <p class="review-text">${review.text}</p>
-            <div class="review-footer">
-                <span class="author">By ${review.author}</span>
-                <span class="date">${review.date}</span>
-            </div>
-        </div>
-    `).join('');
-}
-
-// Handle navigation
-function handleNavigation(page) {
-    // Remove active class from all links
-    navLinks.forEach(link => link.classList.remove('active'));
+// Reset Filters
+resetFiltersBtn.addEventListener('click', () => {
+    // Reset filter state
+    filterState = {
+        search: '',
+        category: 'all',
+        sort: 'newest',
+        ratings: []
+    };
     
-    // Add active class to clicked link
-    const activeLink = Array.from(navLinks).find(link => link.textContent.trim() === page);
-    if (activeLink) {
-        activeLink.classList.add('active');
-    }
+    // Reset form inputs
+    searchInput.value = '';
+    categoryFilter.value = 'all';
+    sortOptions.value = 'newest';
+    ratingFilters.forEach(filter => {
+        filter.checked = false;
+    });
+    
+    // Re-render reviews
+    filterAndRenderReviews();
+});
 
-    // Handle different pages
-    switch(page) {
-        case 'Home':
+// Navigation handling
+navLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const page = e.target.getAttribute('href').substring(1);
+        handleNavigation(page);
+    });
+});
+
+// Mobile menu navigation
+mobileLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const page = e.target.getAttribute('href').substring(1);
+        handleNavigation(page);
+        
+        // Close mobile menu after navigation
+        mobileMenu.classList.remove('active');
+        hamburgerButton.innerHTML = '<i class="fas fa-bars"></i>';
+    });
+});
+
+function handleNavigation(page) {
+    // Update active state for both desktop and mobile navigation
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${page}`) {
+            link.classList.add('active');
+        }
+    });
+    
+    mobileLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${page}`) {
+            link.classList.add('active');
+        }
+    });
+    
+    // Show/hide appropriate sections
+    switch (page) {
+        case 'home':
             showReviews();
             break;
-        case 'Review':
+        case 'review':
             showReviewForm();
             break;
-        case 'About':
+        case 'about':
             showAbout();
             break;
     }
 }
 
-// Function to show reviews section
 function showReviews() {
-    const reviewsContainer = document.getElementById('reviews-container');
-    const submitForm = document.getElementById('submit-review-form');
-    
-    reviewsContainer.style.display = 'grid';
-    submitForm.style.display = 'none';
-    
-    // Hide other sections if they exist
-    const aboutSection = document.getElementById('about-section');
-    if (aboutSection) aboutSection.style.display = 'none';
-    
-    // Render reviews
-    renderReviews();
+    document.querySelector('.reviews-section').style.display = 'block';
+    document.getElementById('submit-review-form').style.display = 'none';
+    document.querySelector('.about-section').style.display = 'none';
+    filterAndRenderReviews();
 }
 
-// Function to show review form
 function showReviewForm() {
-    const reviewsContainer = document.getElementById('reviews-container');
-    const submitForm = document.getElementById('submit-review-form');
-    
-    reviewsContainer.style.display = 'none';
-    submitForm.style.display = 'block';
-    
-    // Hide about section if it exists
-    const aboutSection = document.getElementById('about-section');
-    if (aboutSection) aboutSection.style.display = 'none';
+    document.querySelector('.reviews-section').style.display = 'none';
+    document.getElementById('submit-review-form').style.display = 'block';
+    document.querySelector('.about-section').style.display = 'none';
 }
 
-// Function to show about section
 function showAbout() {
-    const reviewsContainer = document.getElementById('reviews-container');
-    const submitForm = document.getElementById('submit-review-form');
-    
-    reviewsContainer.style.display = 'none';
-    submitForm.style.display = 'none';
-    
-    // Create and show about section if it doesn't exist
-    let aboutSection = document.getElementById('about-section');
-    if (!aboutSection) {
-        aboutSection = document.createElement('div');
-        aboutSection.id = 'about-section';
-        aboutSection.className = 'about-section';
-        aboutSection.innerHTML = `
-            <h2>About CritiqueZone</h2>
-            <p>CritiqueZone is a platform for sharing and discovering reviews across various categories. Our mission is to provide honest, helpful reviews to help you make informed decisions.</p>
-            <h3>Our Features</h3>
-            <ul>
-                <li>Share reviews across multiple categories</li>
-                <li>Filter and sort reviews to find what you're looking for</li>
-                <li>Rate items with our intuitive star rating system</li>
-                <li>Search for specific reviews</li>
-            </ul>
-            <h3>Contact Us</h3>
-            <p>Have questions or feedback? Reach out to us at <a href="mailto:contact@critiquezone.com">contact@critiquezone.com</a></p>
-        `;
-        document.querySelector('.content').appendChild(aboutSection);
-    }
-    aboutSection.style.display = 'block';
+    document.querySelector('.reviews-section').style.display = 'none';
+    document.getElementById('submit-review-form').style.display = 'none';
+    document.querySelector('.about-section').style.display = 'block';
 }
 
-// Handle submit review
-function handleSubmitReview(e) {
-    e.preventDefault();
-
-    const title = document.getElementById('review-title').value;
-    const category = document.getElementById('review-category').value;
-    const rating = document.querySelector('input[name="rating"]:checked').value;
-    const text = document.getElementById('review-text').value;
-    const author = document.getElementById('review-author').value;
-    const date = new Date().toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
+// Filter and sort reviews
+function filterAndRenderReviews() {
+    let filteredReviews = reviews.filter(review => {
+        const matchesSearch = review.title.toLowerCase().includes(filterState.search) ||
+                            review.text.toLowerCase().includes(filterState.search);
+        const matchesCategory = filterState.category === 'all' || review.category === filterState.category;
+        const matchesRating = filterState.ratings.length === 0 || filterState.ratings.includes(review.rating);
+        return matchesSearch && matchesCategory && matchesRating;
     });
+    
+    // Sort reviews
+    filteredReviews.sort((a, b) => {
+        switch (filterState.sort) {
+            case 'newest':
+                return new Date(b.date) - new Date(a.date);
+            case 'oldest':
+                return new Date(a.date) - new Date(b.date);
+            case 'highest':
+                return b.rating - a.rating;
+            case 'lowest':
+                return a.rating - b.rating;
+            default:
+                return 0;
+        }
+    });
+    
+    renderReviews(filteredReviews);
+}
 
-    // Create new review object
-    const newReview = {
-        id: reviews.length + 1,
-        title,
-        category,
-        rating: parseFloat(rating),
-        text,
-        author,
-        date
+// Render star rating
+function renderStarRating(rating) {
+    let stars = '';
+    for (let i = 1; i <= 5; i++) {
+        stars += `<i class="fas fa-star${i <= rating ? '' : '-o'}"></i>`;
+    }
+    return stars;
+}
+
+// Render reviews
+function renderReviews(reviews) {
+    reviewsContainer.innerHTML = reviews.map(review => `
+        <div class="review-card">
+            <div class="review-header">
+                <h3>${review.title}</h3>
+                <div class="rating">${renderStarRating(review.rating)}</div>
+            </div>
+            <div class="category">${review.category}</div>
+            <p class="review-text">${review.text}</p>
+            <div class="review-footer">
+                <span>By ${review.author}</span>
+                <span>${new Date(review.date).toLocaleDateString()}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Form submission
+submitReviewForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const formData = {
+        title: document.getElementById('review-title').value,
+        category: document.getElementById('review-category').value,
+        rating: parseInt(document.querySelector('input[name="rating"]:checked').value),
+        text: document.getElementById('review-text').value,
+        author: document.getElementById('review-author').value,
+        date: new Date().toISOString().split('T')[0]
     };
+    
+    // Add new review to the beginning of the array
+    reviews.unshift({
+        id: reviews.length + 1,
+        ...formData
+    });
+    
+    // Reset form and show reviews
+    submitReviewForm.reset();
+    handleNavigation('home');
+});
 
-    // Add to reviews array
-    reviews.unshift(newReview);
-
-    // Reset form
-    reviewForm.reset();
-
-    // Show success message
-    alert('Review submitted successfully!');
-
-    // Switch to home view
-    handleNavigation('Home');
+// Initialize page
+function initializePage() {
+    // Start with reviews page visible
+    showReviews();
+    
+    // Set up event listeners
+    searchInput.addEventListener('input', (e) => {
+        filterState.search = e.target.value.toLowerCase();
+        filterAndRenderReviews();
+    });
+    
+    categoryFilter.addEventListener('change', (e) => {
+        filterState.category = e.target.value;
+        filterAndRenderReviews();
+    });
+    
+    sortOptions.addEventListener('change', (e) => {
+        filterState.sort = e.target.value;
+        filterAndRenderReviews();
+    });
+    
+    ratingFilters.forEach(filter => {
+        filter.addEventListener('change', () => {
+            filterState.ratings = Array.from(ratingFilters)
+                .filter(f => f.checked)
+                .map(f => parseInt(f.value));
+            filterAndRenderReviews();
+        });
+    });
 }
 
 // Initialize the page when DOM is loaded

@@ -16,19 +16,37 @@
                 <button id="search-button"><i class="fas fa-search"></i></button>
             </div>
             <div class="nav-links">
-                <a href="#" class="active">Home</a>
-                <a href="#">Review</a>
-                <a href="#">About</a>
+                <a href="#home" class="active">Home</a>
+                <a href="#review">Review</a>
+                <a href="#about">About</a>
                 <button id="theme-toggle" class="theme-toggle">
                     <i class="fas fa-moon"></i>
                 </button>
             </div>
+            <div class="hamburger-menu">
+                <button id="hamburger-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
         </nav>
+        <div class="mobile-menu" id="mobile-menu">
+            <a href="#home" class="active">Home</a>
+            <a href="#review">Review</a>
+            <a href="#about">About</a>
+            <button id="mobile-theme-toggle" class="theme-toggle">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
     </header>
 
     <main>
         <aside class="filters">
-            <h2>Filters</h2>
+            <div class="filters-header">
+                <h2>Filters</h2>
+                <button id="reset-filters" class="reset-btn">
+                    <i class="fas fa-redo"></i> Reset
+                </button>
+            </div>
             <div class="filter-group">
                 <label for="category-filter">Category</label>
                 <select id="category-filter">
@@ -104,11 +122,18 @@
                     <option value="lowest">Lowest Rated</option>
                 </select>
             </div>
+            <div class="filter-group">
+                <button id="reset-filters" class="reset-btn">
+                    <i class="fas fa-redo"></i> Reset Filters
+                </button>
+            </div>
         </aside>
 
         <section class="content">
-            <div class="reviews" id="reviews-container">
-                <!-- Reviews will be dynamically added here -->
+            <div class="reviews-section">
+                <div class="reviews" id="reviews-container">
+                    <!-- Reviews will be dynamically added here -->
+                </div>
             </div>
 
             <div class="submit-review-form" id="submit-review-form" style="display: none;">
@@ -153,6 +178,20 @@
                     </div>
                     <button type="submit" class="submit-btn">Submit Review</button>
                 </form>
+            </div>
+            
+            <div class="about-section" style="display: none;">
+                <h2>About CritiqueZone</h2>
+                <p>CritiqueZone is a platform for sharing and discovering reviews across various categories. Our mission is to provide honest, helpful reviews to help you make informed decisions.</p>
+                <h3>Our Features</h3>
+                <ul>
+                    <li>Share reviews across multiple categories</li>
+                    <li>Filter and sort reviews to find what you're looking for</li>
+                    <li>Rate items with our intuitive star rating system</li>
+                    <li>Search for specific reviews</li>
+                </ul>
+                <h3>Contact Us</h3>
+                <p>Have questions or feedback? Reach out to us at <a href="mailto:contact@critiquezone.com">contact@critiquezone.com</a></p>
             </div>
         </section>
     </main>
